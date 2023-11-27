@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Formatting = System.Xml.Formatting;
 
-namespace Lab_5
+namespace Lab_5.Logic
 {
     public class JsonManager<T> where T : new()
     {
@@ -15,7 +15,7 @@ namespace Lab_5
 
         public JsonManager(string path)
         {
-            this._jsonPath = path;
+            _jsonPath = path;
         }
 
         public void SaveToJson(T data, string fileName)
@@ -33,12 +33,12 @@ namespace Lab_5
             };
 
             string json = JsonConvert.SerializeObject(data, jsonSerializerSettings);
-            File.WriteAllText(this._jsonPath + "\\" + fileName, json);
+            File.WriteAllText(_jsonPath + "\\" + fileName, json);
         }
 
         public T LoadJson(string fileName)
         {
-            string allText = File.ReadAllText(this._jsonPath + "\\" + fileName);
+            string allText = File.ReadAllText(_jsonPath + "\\" + fileName);
             T items = JsonConvert.DeserializeObject<T>(allText);
 
             return items;
@@ -46,7 +46,7 @@ namespace Lab_5
 
         public bool IsExists(string fileName)
         {
-            return File.Exists(this._jsonPath + "\\" + fileName);
+            return File.Exists(_jsonPath + "\\" + fileName);
         }
     }
 }

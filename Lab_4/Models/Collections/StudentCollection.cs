@@ -10,7 +10,7 @@ namespace Lab_4.Models.Collections
     public delegate void StudentsChangedHandler<TKey>(object source, StudentsChangedEventArgs<TKey> args)
         where TKey : notnull;
 
-    internal class StudentCollection<TKey>
+    internal class StudentCollection<TKey> where TKey : notnull
     {
         private readonly Dictionary<TKey, Student> students;
         private readonly KeySelector<TKey> selector;

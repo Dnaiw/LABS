@@ -1,0 +1,22 @@
+{
+  "education": 1,
+  "groupNumber": 101,
+  "exams": [
+    {
+      "name": "Matan",
+      "mark": 5,
+      "date": "2023-11-22T18:19:40.0230029+03:00"
+    },
+    {
+      "name": "Maaaaaaath",
+      "mark": 4,
+      "date": "2023-11-22T18:19:40.0293779+03:00"
+    }
+  ],
+  "tests": [
+    {
+      "name": "Linal",
+      "isPassed": false
+    }
+  ]
+}

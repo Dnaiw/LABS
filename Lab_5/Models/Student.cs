@@ -13,6 +13,8 @@ using System.Threading.Channels;
 using System.Xml.Linq;
 using Lab_5.Enumerators;
 using Lab_5.Logic;
+using Lab_5.Models.DTO;
+using Newtonsoft.Json;
 using Microsoft.VisualBasic.CompilerServices;
 
 namespace Lab_5.Models
@@ -24,7 +26,9 @@ namespace Lab_5.Models
         private int groupNumber;
         private List<Exam> exams;
         private List<Test> tests;
-        private JsonManager<Student> jsonManager;
+
+        [JsonIgnore]
+        private JsonManager<StudentDto> jsonManager;
 
         public Student(
             Person person,
@@ -38,7 +42,7 @@ namespace Lab_5.Models
             this.GroupNumber = groupNumber;
             this.exams = new List<Exam>();
             this.tests = new List<Test>();
-            this.jsonManager = new JsonManager<Student>("D:\\LABS\\C#\\LABS\\Lab_5\\Data\\");
+            this.jsonManager = new JsonManager<StudentDto>("D:\\LABS\\C#\\LABS\\Lab_5\\Data\\");
         }
 
         public Student()
@@ -56,7 +60,45 @@ namespace Lab_5.Models
             {
                 new Test()
             };
-            this.jsonManager = new JsonManager<Student>("D:\\LABS\\C#\\LABS\\Lab_5\\Data\\");
+            this.jsonManager = new JsonManager<StudentDto>("D:\\LABS\\C#\\LABS\\Lab_5\\Data\\");
+        }
+
+        public Student(StudentDto dto)
+        {
+            this.tests = dto.Tests;
+            this.education = dto.Education;
+            this.groupNumber = dto.GroupNumber;
+            this.exams = dto.Exams;
+
+            this.jsonManager = new JsonManager<StudentDto>("D:\\LABS\\C#\\LABS\\Lab_5\\Data\\");
+        }
+
+        public static bool Save(Student student, string filename)
+        {
+            try
+            {
+                JsonManager<StudentDto> manager = new JsonManager<StudentDto>("D:\\LABS\\C#\\LABS\\Lab_5\\Data\\");
+                manager.SaveToJson(student.GetDto(), filename);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        public static bool Load(Student student, string filename)
+        {
+            try
+            {
+                JsonManager<StudentDto> manager = new JsonManager<StudentDto>("D:\\LABS\\C#\\LABS\\Lab_5\\Data\\");
+                student = new Student(manager.LoadJson(filename));
+                return true;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
         }
 
         public Education Education
@@ -67,6 +109,17 @@ namespace Lab_5.Models
                 this.OnPropertyChanged("Education");
                 this.education = value;
             }
+        }
+
+        public StudentDto GetDto()
+        {
+            return new StudentDto()
+            {
+                Exams = this.exams,
+                Education = this.education,
+                Tests = this.tests,
+                GroupNumber = this.GroupNumber
+            };
         }
 
         public int GroupNumber
@@ -215,20 +268,20 @@ namespace Lab_5.Models
 
         public new Student DeepCopy()
         {
-            string jsonString = JsonSerializer.Serialize(this);
-            return JsonSerializer.Deserialize<Student>(jsonString);
+            string serialized = JsonConvert.SerializeObject(this.GetDto());
+            return new Student(JsonConvert.DeserializeObject<StudentDto>(serialized));
         }
 
         public bool Save(string fileName)
         {
             try
             {
-                this.jsonManager.SaveToJson(this, fileName);
+                this.jsonManager.SaveToJson(this.GetDto(), fileName);
                 return true;
             }
             catch (Exception ex)
             {
-                return false;
+                throw ex;
             }
         }
 
@@ -236,25 +289,26 @@ namespace Lab_5.Models
         {
             Student loaded = new Student();
 
-            string _firstName = loaded.firstName;
-            string _lastName = loaded.lastName;
-            int _group = loaded.groupNumber;
-            Education _education = loaded.education;
-            List<Test> _tests = loaded.tests;
-            List<Exam> _exams = loaded.exams;
+            string _firstName = "";
+            string _lastName = "";
+            int _group = new();
+            Education _education = new();
+            List<Test> _tests = new();
+            List<Exam> _exams = new();
 
             try
             {
-                loaded = this.jsonManager.LoadJson(fileName);
+                loaded = new Student(this.jsonManager.LoadJson(fileName));
                 _firstName = loaded.firstName;
                 _lastName = loaded.lastName;
                 _group = loaded.groupNumber;
                 _education = loaded.education;
                 _tests = loaded.tests;
+                _exams = loaded.exams;
             }
             catch (Exception ex)
             {
-                return false;
+                throw ex;
             }
 
             this.firstName = _firstName;
@@ -306,6 +360,37 @@ namespace Lab_5.Models
                    this.groupNumber.GetHashCode() +
                    this.Exams.GetHashCode() +
                    this.Education.GetHashCode();
+        }
+
+        public bool AddExamFromConsole()
+        {
+            Console.WriteLine("Enter subject, mark and date of new exam.\n" +
+                              "Enter all the data via 1 string, devide it by space\n" +
+                              "Date should be entered in format dd//mm/yyyy");
+
+            try
+            {
+                string rawData = Console.ReadLine();
+                string[] parts = rawData.Split(" ");
+
+                Exam newExam = new Exam();
+
+                newExam.Name = parts[0];
+                newExam.Mark = Int32.Parse(parts[1]);
+                newExam.Date = DateTime.Parse(parts[2]);
+
+                this.Exams.Add(newExam);
+                return true;
+
+                // string[] dateParts = parts[2].Split("/");
+                // int year = int.Parse(dateParts[2]);
+                // int month = int.Parse(dateParts[2]);
+                // int day = int.Parse(dateParts[2]);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
         }
 
         public void SortExamsByName()
